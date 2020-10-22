@@ -14,14 +14,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
-
 @Service
 public class StoreRetrieveService {
-	
+
 	@Autowired
 	JdbcTemplate jdbcTemplate;
-	
+
 	private final Path root = Paths.get("uploads");
 
 	public void init() {
@@ -70,7 +68,13 @@ public class StoreRetrieveService {
 					errorMsgs.add("An entered salary has been detected to be negative");
 					return errorMsgs;
 				}
-
+			}
+			// Insert only after checks are done
+			br = Files.newBufferedReader(savedFilePath);
+			while ((line = br.readLine()) != null) {
+				String[] columns = line.split(",");
+				// Insert a single row into the db
+				this.insert(columns);
 			}
 
 		} catch (Exception e) {
@@ -81,8 +85,12 @@ public class StoreRetrieveService {
 
 		return errorMsgs;
 	}
-	
-	public void insert() {
-		 
+
+	public void insert(String[] entry) {
+		final String insertStatement = "INSERT INTO employees (employee_id,employee_login,employee_name"
+				+ ",employee_salary) VALUES(?,?,?,?)";
+		jdbcTemplate.update(insertStatement, new Object[] { entry[0], entry[1], entry[2], Float.parseFloat(entry[3]) });
+	    System.out.println("Update done");
 	}
+
 }

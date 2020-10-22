@@ -1,5 +1,6 @@
 package com.cognizant.backend.employeeapp.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,9 @@ public class ApplicationController {
 		if (errors.size() > 0) {
 			return new ResponseEntity<Object>(errors, HttpStatus.BAD_REQUEST);
 		} else {
-			return ResponseEntity.ok("Upload done!");
+			ArrayList<String> parseSuccess = new ArrayList<String>();
+			parseSuccess.add("Successful File Upload !");
+			return new ResponseEntity<Object>(parseSuccess, HttpStatus.OK);
 		}
 	}
 
