@@ -5,20 +5,28 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+
+
 @Service
 public class StoreRetrieveService {
-
+	
+	@Autowired
+	JdbcTemplate jdbcTemplate;
+	
 	private final Path root = Paths.get("uploads");
 
 	public void init() {
 		try {
-			Files.createDirectory(root);
+			Files.createDirectories(root);
 		} catch (IOException e) {
 			throw new RuntimeException("Could not initialize folder for upload!");
 		}
@@ -29,13 +37,14 @@ public class StoreRetrieveService {
 		ArrayList<String> errorMsgs = new ArrayList<String>();
 
 		try {
-            //Check whether the file is empty
+			// Check whether the file is empty
 			if (file.getSize() == 0) {
 				errorMsgs.add("File is empty");
 				return errorMsgs;
 			}
 
-			Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
+			Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()),
+					StandardCopyOption.REPLACE_EXISTING);
 			savedFilePath = this.root.resolve(file.getOriginalFilename());
 
 			BufferedReader br = Files.newBufferedReader(savedFilePath);
@@ -44,24 +53,24 @@ public class StoreRetrieveService {
 
 				System.out.println(line);
 				String[] columns = line.split(",");
-				//Check if there is too many or too few columns
-				if (columns.length > 4 || columns.length < 4) {
+				// Check if there is too many or too few columns
+				if (columns.length != 4) {
 					errorMsgs.add("Please make sure there are only 4 columns per row");
 					return errorMsgs;
 				}
-				//Check if salary is incorrectly formatted
+				// Check if salary is incorrectly formatted
 				try {
 					Float.parseFloat(columns[3]);
 				} catch (NumberFormatException e) {
 					errorMsgs.add("Unable to parse salary, make sure it is formatted correctly");
 					return errorMsgs;
 				}
-				//Check if salary is negative or not
-				if(Float.parseFloat(columns[3]) < 0) {
+				// Check if salary is negative or not
+				if (Float.parseFloat(columns[3]) < 0) {
 					errorMsgs.add("An entered salary has been detected to be negative");
 					return errorMsgs;
 				}
-				
+
 			}
 
 		} catch (Exception e) {
@@ -72,5 +81,8 @@ public class StoreRetrieveService {
 
 		return errorMsgs;
 	}
-
+	
+	public void insert() {
+		 
+	}
 }
