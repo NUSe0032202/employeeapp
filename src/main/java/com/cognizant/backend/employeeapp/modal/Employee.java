@@ -2,17 +2,17 @@ package com.cognizant.backend.employeeapp.modal;
 
 public class Employee {
 
-	private String employeeTitile;
+	private String employeeID;
 	private String employeeLogin;
 	private String employeeName;
 	private Double employeeSalary;
 
-	public String getEmployeeTitile() {
-		return employeeTitile;
+	public String getEmployeeID() {
+		return employeeID;
 	}
 
-	public void setEmployeeTitile(String employeeTitile) {
-		this.employeeTitile = employeeTitile;
+	public void setEmployeeID(String employeeID) {
+		this.employeeID = employeeID;
 	}
 
 	public String getEmployeeLogin() {

@@ -6,13 +6,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.cognizant.backend.employeeapp.modal.Employee;
 
 @Service
 public class StoreRetrieveService {
@@ -48,6 +53,10 @@ public class StoreRetrieveService {
 			BufferedReader br = Files.newBufferedReader(savedFilePath);
 			String line;
 			while ((line = br.readLine()) != null) {
+				
+				if(line.charAt(0) == '#' ) {
+					continue;
+				}
 
 				System.out.println(line);
 				String[] columns = line.split(",");
@@ -86,11 +95,49 @@ public class StoreRetrieveService {
 		return errorMsgs;
 	}
 
+	public List<Employee> retrieveFilteredEmployees(int minSalary, int maxSalary, int offset, int limit,
+			String sortBy) {
+
+		String queryStatement;
+		String orderBy = sortBy.substring(1);
+		String column = null;
+
+		switch (orderBy) {
+
+		case "ID":
+			column = "employee_id";
+			break;
+		case "Name":
+			column = "employee_name";
+			break;
+		case "Login":
+			column = "employee_login";
+			break;
+		case "Salary":
+			column = "employee_salary";
+			break;
+		}
+
+		if (sortBy.charAt(0) == '+') {
+
+			queryStatement = "SELECT * FROM employees WHERE employee_salary > ? AND employee_salary < ?"
+					+ " ORDER BY " + column + "LIMIT ? OFFSET ?";
+		} else {
+			queryStatement = "SELECT * FROM employees WHERE employee_salary > ? AND employee_salary < ?"
+					+ " ORDER BY " + column + " DESC LIMIT ? OFFSET ?";
+		}
+
+		List<Employee> data = jdbcTemplate.query(queryStatement,
+				new Object[] { minSalary, maxSalary, limit, offset }, new EmployeeRowMapper());
+
+		return data;
+	}
+
 	public void insert(String[] entry) {
 		final String insertStatement = "INSERT INTO employees (employee_id,employee_login,employee_name"
 				+ ",employee_salary) VALUES(?,?,?,?)";
 		jdbcTemplate.update(insertStatement, new Object[] { entry[0], entry[1], entry[2], Float.parseFloat(entry[3]) });
-	    System.out.println("Update done");
+		System.out.println("Update done");
 	}
 
 }
