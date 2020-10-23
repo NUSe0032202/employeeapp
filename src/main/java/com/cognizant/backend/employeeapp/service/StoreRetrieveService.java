@@ -53,12 +53,11 @@ public class StoreRetrieveService {
 			BufferedReader br = Files.newBufferedReader(savedFilePath);
 			String line;
 			while ((line = br.readLine()) != null) {
-				
-				if(line.charAt(0) == '#' ) {
+             
+				System.out.println(line);
+				if (line.charAt(0) == '#') {
 					continue;
 				}
-
-				System.out.println(line);
 				String[] columns = line.split(",");
 				// Check if there is too many or too few columns
 				if (columns.length != 4) {
@@ -66,14 +65,16 @@ public class StoreRetrieveService {
 					return errorMsgs;
 				}
 				// Check if salary is incorrectly formatted
-				try {
-					Float.parseFloat(columns[3]);
-				} catch (NumberFormatException e) {
-					errorMsgs.add("Unable to parse salary, make sure it is formatted correctly");
-					return errorMsgs;
-				}
+			
+					try {
+						Float.parseFloat(columns[3]);
+					} catch (NumberFormatException e) {
+						errorMsgs.add("Unable to parse salary, make sure it is formatted correctly");
+						return errorMsgs;
+					}
+			
 				// Check if salary is negative or not
-				if (Float.parseFloat(columns[3]) < 0) {
+				if (Float.parseFloat(columns[3]) < 0 ) {
 					errorMsgs.add("An entered salary has been detected to be negative");
 					return errorMsgs;
 				}
@@ -81,6 +82,9 @@ public class StoreRetrieveService {
 			// Insert only after checks are done
 			br = Files.newBufferedReader(savedFilePath);
 			while ((line = br.readLine()) != null) {
+				if (line.charAt(0) == '#') {
+					continue;
+				}
 				String[] columns = line.split(",");
 				// Insert a single row into the db
 				this.insert(columns);
@@ -120,15 +124,15 @@ public class StoreRetrieveService {
 
 		if (sortBy.charAt(0) == '+') {
 
-			queryStatement = "SELECT * FROM employees WHERE employee_salary > ? AND employee_salary < ?"
-					+ " ORDER BY " + column + "LIMIT ? OFFSET ?";
+			queryStatement = "SELECT * FROM employees WHERE employee_salary >= ? AND employee_salary <= ?" + " ORDER BY "
+					+ column + " LIMIT ? OFFSET ?";
 		} else {
-			queryStatement = "SELECT * FROM employees WHERE employee_salary > ? AND employee_salary < ?"
-					+ " ORDER BY " + column + " DESC LIMIT ? OFFSET ?";
+			queryStatement = "SELECT * FROM employees WHERE employee_salary >= ? AND employee_salary <= ?" + " ORDER BY "
+					+ column + " DESC LIMIT ? OFFSET ?";
 		}
 
-		List<Employee> data = jdbcTemplate.query(queryStatement,
-				new Object[] { minSalary, maxSalary, limit, offset }, new EmployeeRowMapper());
+		List<Employee> data = jdbcTemplate.query(queryStatement, new Object[] { minSalary, maxSalary, limit, offset },
+				new EmployeeRowMapper());
 
 		return data;
 	}
