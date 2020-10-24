@@ -27,7 +27,7 @@ public class ApplicationController {
 	StoreRetrieveService storeRetrieveService;
 
 	@PostMapping("/users/upload")
-	public ResponseEntity<Object> uploadUsers(@RequestParam("file") MultipartFile file) {
+	public synchronized ResponseEntity<Object> uploadUsers(@RequestParam("file") MultipartFile file) {
 		List<String> errors = storeRetrieveService.readAndValidate(file);
 		if (errors.size() > 0) {
 			return new ResponseEntity<Object>(errors, HttpStatus.BAD_REQUEST);
