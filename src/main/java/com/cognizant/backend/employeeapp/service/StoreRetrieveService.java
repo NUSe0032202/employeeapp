@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -53,8 +54,8 @@ public class StoreRetrieveService {
 			BufferedReader br = Files.newBufferedReader(savedFilePath);
 			String line;
 			while ((line = br.readLine()) != null) {
-             
-				System.out.println(line);
+
+				// System.out.println(line);
 				if (line.charAt(0) == '#') {
 					continue;
 				}
@@ -65,16 +66,16 @@ public class StoreRetrieveService {
 					return errorMsgs;
 				}
 				// Check if salary is incorrectly formatted
-			
-					try {
-						Float.parseFloat(columns[3]);
-					} catch (NumberFormatException e) {
-						errorMsgs.add("Unable to parse salary, make sure it is formatted correctly");
-						return errorMsgs;
-					}
-			
+
+				try {
+					Float.parseFloat(columns[3]);
+				} catch (NumberFormatException e) {
+					errorMsgs.add("Unable to parse salary, make sure it is formatted correctly");
+					return errorMsgs;
+				}
+
 				// Check if salary is negative or not
-				if (Float.parseFloat(columns[3]) < 0 ) {
+				if (Float.parseFloat(columns[3]) < 0) {
 					errorMsgs.add("An entered salary has been detected to be negative");
 					return errorMsgs;
 				}
@@ -124,11 +125,11 @@ public class StoreRetrieveService {
 
 		if (sortBy.charAt(0) == '+') {
 
-			queryStatement = "SELECT * FROM employees WHERE employee_salary >= ? AND employee_salary <= ?" + " ORDER BY "
-					+ column + " LIMIT ? OFFSET ?";
+			queryStatement = "SELECT * FROM employees WHERE employee_salary >= ? AND employee_salary <= ?"
+					+ " ORDER BY " + column + " LIMIT ? OFFSET ?";
 		} else {
-			queryStatement = "SELECT * FROM employees WHERE employee_salary >= ? AND employee_salary <= ?" + " ORDER BY "
-					+ column + " DESC LIMIT ? OFFSET ?";
+			queryStatement = "SELECT * FROM employees WHERE employee_salary >= ? AND employee_salary <= ?"
+					+ " ORDER BY " + column + " DESC LIMIT ? OFFSET ?";
 		}
 
 		List<Employee> data = jdbcTemplate.query(queryStatement, new Object[] { minSalary, maxSalary, limit, offset },
@@ -138,9 +139,18 @@ public class StoreRetrieveService {
 	}
 
 	public void insert(String[] entry) {
-		final String insertStatement = "INSERT INTO employees (employee_id,employee_login,employee_name"
-				+ ",employee_salary) VALUES(?,?,?,?)";
-		jdbcTemplate.update(insertStatement, new Object[] { entry[0], entry[1], entry[2], Float.parseFloat(entry[3]) });
+		try {
+			final String insertStatement = "INSERT INTO employees (employee_id,employee_login,employee_name"
+					+ ",employee_salary) VALUES(?,?,?,?)";
+			jdbcTemplate.update(insertStatement,
+					new Object[] { entry[0], entry[1], entry[2], Float.parseFloat(entry[3]) });
+		} catch (DuplicateKeyException e) {
+			System.out.println("Duplicate key exception");
+
+			final String overwriteStatement = "UPDATE employees SET employee_login = ?, employee_name = ?, "
+					+ "employee_salary = ? WHERE employee_id = ?";
+			jdbcTemplate.update(overwriteStatement, new Object[] { entry[1], entry[2], entry[3], entry[0] });
+		}
 		System.out.println("Update done");
 	}
 
