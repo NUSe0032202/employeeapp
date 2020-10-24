@@ -25,6 +25,8 @@ public class StoreRetrieveService {
 
 	@Autowired
 	JdbcTemplate jdbcTemplate;
+	
+	ArrayList<String> errorMsgs = new ArrayList<String>();
 
 	private final Path root = Paths.get("uploads");
 
@@ -38,8 +40,8 @@ public class StoreRetrieveService {
 
 	public List<String> readAndValidate(MultipartFile file) {
 		Path savedFilePath;
-		ArrayList<String> errorMsgs = new ArrayList<String>();
-
+		//ArrayList<String> errorMsgs = new ArrayList<String>();
+        errorMsgs.clear();
 		try {
 			// Check whether the file is empty
 			if (file.getSize() == 0) {
@@ -82,13 +84,22 @@ public class StoreRetrieveService {
 			}
 			// Insert only after checks are done
 			br = Files.newBufferedReader(savedFilePath);
+			boolean duplicateExceptionFlag = false;
 			while ((line = br.readLine()) != null) {
 				if (line.charAt(0) == '#') {
 					continue;
 				}
 				String[] columns = line.split(",");
 				// Insert a single row into the db
-				this.insert(columns);
+				try {
+				   this.insert(columns);
+				} catch (DuplicateKeyException exception) {
+					duplicateExceptionFlag = true;
+				}
+			}
+			
+			if(duplicateExceptionFlag) {
+				errorMsgs.add("Duplicate ID/Login detected");
 			}
 
 		} catch (Exception e) {
@@ -145,11 +156,10 @@ public class StoreRetrieveService {
 			jdbcTemplate.update(insertStatement,
 					new Object[] { entry[0], entry[1], entry[2], Float.parseFloat(entry[3]) });
 		} catch (DuplicateKeyException e) {
-			System.out.println("Duplicate key exception");
-
 			final String overwriteStatement = "UPDATE employees SET employee_login = ?, employee_name = ?, "
 					+ "employee_salary = ? WHERE employee_id = ?";
 			jdbcTemplate.update(overwriteStatement, new Object[] { entry[1], entry[2], entry[3], entry[0] });
+			throw new DuplicateKeyException("Dupicate Key Exception");
 		}
 		System.out.println("Update done");
 	}
