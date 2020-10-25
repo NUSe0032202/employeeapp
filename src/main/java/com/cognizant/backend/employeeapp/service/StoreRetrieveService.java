@@ -58,7 +58,8 @@ public class StoreRetrieveService {
 			while ((line = br.readLine()) != null) {
 
 				// System.out.println(line);
-				if (line.charAt(0) == '#') {
+				if (line.charAt(0) == '#' || line.contains("login")) {
+					//System.out.println(line);
 					continue;
 				}
 				String[] columns = line.split(",");
@@ -86,7 +87,7 @@ public class StoreRetrieveService {
 			br = Files.newBufferedReader(savedFilePath);
 			boolean duplicateExceptionFlag = false;
 			while ((line = br.readLine()) != null) {
-				if (line.charAt(0) == '#') {
+				if (line.charAt(0) == '#' || line.contains("login")) {
 					continue;
 				}
 				String[] columns = line.split(",");
