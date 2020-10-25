@@ -2,41 +2,35 @@ package com.cognizant.backend.employeeapp.modal;
 
 public class Employee {
 
-	private String employeeID;
-	private String employeeLogin;
-	private String employeeName;
-	private Double employeeSalary;
-
-	public String getEmployeeID() {
-		return employeeID;
+	private String id;
+	private String name;
+	private String login;
+	private Double salary;
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getLogin() {
+		return login;
+	}
+	public void setLogin(String login) {
+		this.login = login;
+	}
+	public Double getSalary() {
+		return salary;
+	}
+	public void setSalary(Double salary) {
+		this.salary = salary;
 	}
 
-	public void setEmployeeID(String employeeID) {
-		this.employeeID = employeeID;
-	}
-
-	public String getEmployeeLogin() {
-		return employeeLogin;
-	}
-
-	public void setEmployeeLogin(String employeeLogin) {
-		this.employeeLogin = employeeLogin;
-	}
-
-	public String getEmployeeName() {
-		return employeeName;
-	}
-
-	public void setEmployeeName(String employeeName) {
-		this.employeeName = employeeName;
-	}
-
-	public Double getEmployeeSalary() {
-		return employeeSalary;
-	}
-
-	public void setEmployeeSalary(Double employeeSalary) {
-		this.employeeSalary = employeeSalary;
-	}
-
+	
 }
