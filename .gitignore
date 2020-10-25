@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+*.csv
+*.csv
+uploads/test_overlap.csv
