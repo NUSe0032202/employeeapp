@@ -152,5 +152,9 @@ public class StoreRetrieveService {
 			throw new DuplicateKeyException("Dupicate Key Exception");
 		}
 	}
+	public void delete(String id) {
+		final String deleteStatement ="DELETE from employees WHERE employee_id = ?";
+		jdbcTemplate.update(deleteStatement, new Object[] {id});
+	}
 
 }
