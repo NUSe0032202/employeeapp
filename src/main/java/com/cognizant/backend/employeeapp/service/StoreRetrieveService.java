@@ -6,15 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,10 +37,9 @@ public class StoreRetrieveService {
 
 	public List<String> readAndValidate(MultipartFile file) {
 		Path savedFilePath;
-		//ArrayList<String> errorMsgs = new ArrayList<String>();
         errorMsgs.clear();
 		try {
-			// Check whether the file is empty
+			
 			if (file.getSize() == 0) {
 				errorMsgs.add("File is empty");
 				return errorMsgs;
@@ -57,18 +53,15 @@ public class StoreRetrieveService {
 			String line;
 			while ((line = br.readLine()) != null) {
 
-				// System.out.println(line);
+				
 				if (line.charAt(0) == '#' || line.contains("login")) {
-					//System.out.println(line);
 					continue;
 				}
 				String[] columns = line.split(",");
-				// Check if there is too many or too few columns
 				if (columns.length != 4) {
 					errorMsgs.add("Please make sure there are only 4 columns per row");
 					return errorMsgs;
 				}
-				// Check if salary is incorrectly formatted
 
 				try {
 					Float.parseFloat(columns[3]);
@@ -77,13 +70,12 @@ public class StoreRetrieveService {
 					return errorMsgs;
 				}
 
-				// Check if salary is negative or not
 				if (Float.parseFloat(columns[3]) < 0) {
 					errorMsgs.add("An entered salary has been detected to be negative");
 					return errorMsgs;
 				}
 			}
-			// Insert only after checks are done
+			// Insert into dB only after checks have been completed
 			br = Files.newBufferedReader(savedFilePath);
 			boolean duplicateExceptionFlag = false;
 			while ((line = br.readLine()) != null) {
@@ -91,7 +83,6 @@ public class StoreRetrieveService {
 					continue;
 				}
 				String[] columns = line.split(",");
-				// Insert a single row into the db
 				try {
 				   this.insert(columns);
 				} catch (DuplicateKeyException exception) {
@@ -104,8 +95,6 @@ public class StoreRetrieveService {
 			}
 
 		} catch (Exception e) {
-			// throw new RuntimeException("Could not store the file. Error: " +
-			// e.getMessage());
 			e.printStackTrace();
 		}
 
@@ -162,7 +151,6 @@ public class StoreRetrieveService {
 			jdbcTemplate.update(overwriteStatement, new Object[] { entry[1], entry[2], entry[3], entry[0] });
 			throw new DuplicateKeyException("Dupicate Key Exception");
 		}
-		System.out.println("Update done");
 	}
 
 }
