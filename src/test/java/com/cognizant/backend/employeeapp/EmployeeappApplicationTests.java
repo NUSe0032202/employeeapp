@@ -55,25 +55,47 @@ class EmployeeappApplicationTests {
 	}
 
 	@Test
-	public void test_ExistingRecords() {
+	public void test_ExistingID() {
 		Employee emp1 = new Employee("e001", "peter", "guest123", 100.0);
 		Employee emp2 = new Employee("e001", "peter", "qwerty", 71263.0);
-		
+
 		String[] input1 = { emp1.getId(), emp1.getLogin(), emp1.getName(), Double.toString(emp1.getSalary()) };
 		String[] input2 = { emp2.getId(), emp2.getLogin(), emp2.getName(), Double.toString(emp2.getSalary()) };
-        
-		//Assert that an error is thrown due to same employee id
+
+		// Assert that an error is thrown due to same employee id
 		assertThatThrownBy(() -> {
-			 service.insert(input1);
- 		     service.insert(input2);
+			service.insert(input1);
+			service.insert(input2);
+		}).isInstanceOf(DuplicateKeyException.class);
+
+		List<Employee> data = service.retrieveFilteredEmployees(0, 99999, 0, 2, "+ID");
+
+		assertThat(data).isNotEmpty();
+		assertThat(data)
+				.extracting(emp -> emp.getId(), emp -> emp.getName(), emp -> emp.getLogin(), emp -> emp.getSalary())
+				.containsExactly(tuple("e001", "peter", "qwerty", 71263.0));
+	}
+
+	@Test
+	public void test_ExistingLogin() {
+		Employee emp1 = new Employee("e001", "peter", "guest123", 100.0);
+		Employee emp2 = new Employee("e002", "jane", "guest123", 71263.0);
+
+		String[] input1 = { emp1.getId(), emp1.getLogin(), emp1.getName(), Double.toString(emp1.getSalary()) };
+		String[] input2 = { emp2.getId(), emp2.getLogin(), emp2.getName(), Double.toString(emp2.getSalary()) };
+
+		// Assert that an error is thrown due to same login already registered in dB
+		assertThatThrownBy(() -> {
+			service.insert(input1);
+			service.insert(input2);
 		}).isInstanceOf(DuplicateKeyException.class);
 		
 		List<Employee> data = service.retrieveFilteredEmployees(0, 99999, 0, 2, "+ID");
-        
+		
 		assertThat(data).isNotEmpty();
 		assertThat(data)
 		.extracting(emp -> emp.getId(), emp -> emp.getName(), emp -> emp.getLogin(), emp -> emp.getSalary())
-		.containsExactly(tuple("e001", "peter", "qwerty", 71263.0));
+		.containsExactly(tuple("e001", "peter", "guest123", 100.0));
 	}
 
 }
