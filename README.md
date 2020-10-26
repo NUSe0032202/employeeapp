@@ -23,7 +23,7 @@
 ## How to use 
 
 1. Navigate to releases in this repository and download the jar file
-2. Save it to your desired folder
+2. Save the file to your desired folder
 3. Open command prompt and navigate to the folder containing the jar file
 4. Run the command `java -jar nameofjarfile.jar`
 5. Alternatively, you can just download the project, unzip it, import it to eclipse or any ide before running the application.
